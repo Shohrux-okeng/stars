@@ -101,3 +101,4 @@ Hozircha "Karta orqali (avto)" tugmasi shunchaki "tez kunda" degan xabar beradi 
 # stars-bot
 # stars
 # stars
+# stars-bot
