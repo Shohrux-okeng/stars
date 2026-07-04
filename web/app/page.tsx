@@ -1,10 +1,7 @@
 'use client';
 
-import { Header } from '@/components/header';
-import { BottomNav } from '@/components/bottom-nav';
-import { PageContainer } from '@/components/page-container';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [balance, setBalance] = useState(2251);
