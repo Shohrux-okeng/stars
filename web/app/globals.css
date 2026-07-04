@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+:root {
+  /* Primary Colors */
+  --primary: #8b5cf6;
+  --primary-dark: #6d28d9;
+  --accent-pink: #ec4899;
+  --accent-blue: #06b6d4;
+  
+  /* Backgrounds */
+  --background: #0f0a1a;
+  --background-secondary: #1a0f2e;
+  --background-card: rgba(23, 16, 42, 0.5);
+  --background-card-hover: rgba(23, 16, 42, 0.8);
+  
+  /* Text Colors */
+  --foreground: #f1f5f9;
+  --foreground-muted: #cbd5e1;
+  --foreground-dim: #94a3b8;
+  
+  /* Accents */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  
+  /* Border */
+  --border: rgba(148, 163, 184, 0.2);
+  --border-light: rgba(148, 163, 184, 0.1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent-pink);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: linear-gradient(135deg, #0f0a1a 0%, #1a0f2e 50%, #0f0a1a 100%);
+  background-attachment: fixed;
+  color: var(--foreground);
+  font-family: var(--font-geist-sans);
+  min-height: 100vh;
+}
+
+/* Starfield background effect */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 20% 30%, #eee, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 60% 70%, #fff, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 50% 50%, #ddd, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 80% 10%, #fff, rgba(0,0,0,0)),
+    radial-gradient(2px 2px at 90% 60%, #eee, rgba(0,0,0,0)),
+    radial-gradient(1px 1px at 30% 80%, #fff, rgba(0,0,0,0));
+  background-size: 200% 200%, 300% 300%, 150% 150%, 250% 250%, 200% 200%, 100% 100%;
+  background-position: 0% 0%, 50% 50%, 25% 75%, 75% 25%, 10% 90%, 40% 40%;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: -1;
+}
+
+html {
+  background: var(--background);
+}
+
+/* Glass morphism effect */
+.glass {
+  background: var(--background-card);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.glass-hover:hover {
+  background: var(--background-card-hover);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent-pink) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gradient button */
+.gradient-button {
+  background: linear-gradient(135deg, #06b6d4 0%, #ec4899 100%);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.gradient-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(236, 72, 153, 0.3);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-pink);
+}
