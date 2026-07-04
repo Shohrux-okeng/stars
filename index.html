@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stars & Premium Shop</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0a1b;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #8a2be2;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --stars-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            --text-main: #ffffff;
+            --text-muted: #a09fbd;
+            --glass-blur: blur(12px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: var(--bg-color);
+            background-image: radial-gradient(circle at top right, rgba(138, 43, 226, 0.15), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(75, 0, 130, 0.15), transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 80px; /* space for bottom nav */
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .glass-card:active { transform: scale(0.98); }
+
+        /* Container */
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; display: none; animation: fadeIn 0.3s ease-in-out; }
+        .container.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .header h1 { font-size: 24px; font-weight: 600; }
+        .user-avatar { width: 45px; height: 45px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+
+        /* Balance Section */
+        .balance-section { margin-bottom: 25px; text-align: center; position: relative; overflow: hidden; }
+        .balance-title { font-size: 14px; color: var(--text-muted); margin-bottom: 5px; }
+        .balance-amount { font-size: 36px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .balance-amount i { color: #f6d365; font-size: 28px; }
+        .btn-topup { background: var(--primary-gradient); color: white; border: none; padding: 15px 30px; border-radius: 15px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4); display: flex; justify-content: center; align-items: center; gap: 10px; }
+
+        /* Grid Services */
+        .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .service-card { text-align: left; padding: 20px 15px; position: relative; overflow: hidden; cursor: pointer; }
+        .service-icon { width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 15px; }
+        .stars-icon { background: var(--stars-gradient); box-shadow: 0 4px 15px rgba(246, 211, 101, 0.3); }
+        .premium-icon { background: var(--primary-gradient); box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3); }
+        .service-title { font-size: 16px; font-weight: 600; margin-bottom: 5px; }
+        .service-desc { font-size: 12px; color: var(--text-muted); }
+        .arrow-right { position: absolute; right: 15px; bottom: 20px; color: var(--text-muted); opacity: 0.5; }
+
+        /* Referral Banner */
+        .referral-banner { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; margin-bottom: 20px; cursor: pointer; }
+        .ref-left { display: flex; align-items: center; gap: 15px; }
+        .ref-icon { font-size: 20px; color: #a09fbd; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; }
+
+        /* Rating List */
+        .rating-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .rating-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 15px; }
+        .rating-user { display: flex; align-items: center; gap: 15px; }
+        .rank { font-weight: bold; width: 25px; text-align: center; }
+        .rank-1 { color: #FFD700; font-size: 18px; }
+        .rank-2 { color: #C0C0C0; font-size: 18px; }
+        .rank-3 { color: #CD7F32; font-size: 18px; }
+        .rating-amount { font-weight: 600; color: #4ade80; }
+
+        /* Profile & History */
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+        .empty-state i { font-size: 50px; margin-bottom: 15px; opacity: 0.5; }
+        .profile-id-card { text-align: center; padding: 30px 20px; margin-top: 20px; }
+        .profile-id-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .profile-id { font-size: 28px; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px; }
+        .copy-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 20px; border-radius: 20px; cursor: pointer; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(13, 10, 27, 0.85); backdrop-filter: blur(15px); border-top: 1px solid var(--card-border); display: flex; justify-content: space-around; padding: 15px 10px; z-index: 1000; padding-bottom: max(15px, env(safe-area-inset-bottom)); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-muted); text-decoration: none; font-size: 12px; transition: 0.3s; cursor: pointer; width: 25%; }
+        .nav-item i { font-size: 20px; transition: 0.3s; }
+        .nav-item.active { color: #fff; }
+        .nav-item.active i { color: #b185fa; transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+
+    <div id="tab-home" class="container active">
+        <div class="header">
+            <h1>Asosiy</h1>
+            <div class="user-avatar" id="user-avatar">A</div>
+        </div>
+
+        <div class="glass-card balance-section">
+            <div class="balance-title">Sizning balansingiz</div>
+            <div class="balance-amount"><i class="fa-solid fa-coins"></i> 0 <span style="font-size: 18px; color: var(--text-muted); font-weight: normal;">so'm</span></div>
+            <button class="btn-topup" onclick="tgAlert('Hisobni to\'ldirish tizimi bot orqali ishlaydi!')">
+                <i class="fa-solid fa-plus"></i> Hisobni to'ldirish
+            </button>
+        </div>
+
+        <div class="services-grid">
+            <div class="glass-card service-card" onclick="tgAlert('Stars xarid qilish menyusi')">
+                <div class="service-icon stars-icon"><i class="fa-solid fa-star"></i></div>
+                <div class="service-title">Stars olish</div>
+                <div class="service-desc">Telegram Stars</div>
+                <i class="fa-solid fa-chevron-right arrow-right"></i>
+            </div>
+            
+            <div class="glass-card service-card" onclick="tgAlert('Premium xarid qilish menyusi')">
+                <div class="service-icon premium-icon"><i class="fa-solid fa-gem"></i></div>
+                <div class="service-title">Premium</div>
+                <div class="service-desc">Telegram Premium</div>
+                <i class="fa-solid fa-chevron-right arrow-right"></i>
+            </div>
+        </div>
+
+        <div class="glass-card referral-banner" onclick="tgAlert('Referal ssilka nusxalandi!')">
+            <div class="ref-left">
+                <div class="ref-icon"><i class="fa-solid fa-link"></i></div>
+                <div>
+                    <div style="font-weight: 600;">Referral tizim</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">2% doimiy ulush oling</div>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); opacity: 0.5;"></i>
+        </div>
+    </div>
+
+    <div id="tab-history" class="container">
+        <div class="header">
+            <h1>Tarix</h1>
+        </div>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Barcha xaridlar va to'lovlar</p>
+        
+        <div class="empty-state">
+            <i class="fa-regular fa-folder-open"></i>
+            <p>Hali buyurtmalar yo'q</p>
+        </div>
+    </div>
+
+    <div id="tab-rating" class="container">
+        <div class="header">
+            <h1>Savdo reytingi</h1>
+        </div>
+        <p style="color: var(--text-muted); font-size: 14px;">Kim ko'p xarid qildi?</p>
+        
+        <div class="rating-list">
+            <div class="rating-item">
+                <div class="rating-user"><span class="rank rank-1"><i class="fa-solid fa-medal"></i></span> @UZ_CS</div>
+                <div class="rating-amount">176 760</div>
+            </div>
+            <div class="rating-item">
+                <div class="rating-user"><span class="rank rank-2"><i class="fa-solid fa-medal"></i></span> @Theo_updates</div>
+                <div class="rating-amount">150 000</div>
+            </div>
+            <div class="rating-item">
+                <div class="rating-user"><span class="rank rank-3"><i class="fa-solid fa-medal"></i></span> @Abdiazizova</div>
+                <div class="rating-amount">108 000</div>
+            </div>
+            <div class="rating-item">
+                <div class="rating-user"><span class="rank">4</span> @wheywhy</div>
+                <div class="rating-amount">36 000</div>
+            </div>
+            <div class="rating-item">
+                <div class="rating-user"><span class="rank">5</span> @kamron201</div>
+                <div class="rating-amount">27 000</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-profile" class="container">
+        <div class="header">
+            <h1>Profil</h1>
+        </div>
+
+        <div class="glass-card profile-id-card">
+            <div class="user-avatar" style="width: 70px; height: 70px; font-size: 30px; margin: 0 auto 15px auto;" id="profile-avatar">A</div>
+            <div class="profile-id-title">TELEGRAM ID</div>
+            <div class="profile-id" id="user-tg-id">8474897647</div>
+            <button class="copy-btn" onclick="copyId()"><i class="fa-regular fa-copy"></i> Nusxalash</button>
+        </div>
+
+        <h3 style="margin: 25px 0 10px 0; font-size: 16px;"><i class="fa-solid fa-robot"></i> API Kirish</h3>
+        <div class="glass-card" style="text-align: center; padding: 20px; cursor: pointer;" onclick="tgAlert('Yangi kalit yaratilmoqda...')">
+            + Yangi kalit yaratish
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home', this)">
+            <i class="fa-solid fa-house"></i>
+            <span>Asosiy</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('history', this)">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Tarix</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('rating', this)">
+            <i class="fa-solid fa-trophy"></i>
+            <span>Reyting</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('profile', this)">
+            <i class="fa-solid fa-user"></i>
+            <span>Men</span>
+        </div>
+    </div>
+
+    <script>
+        // Telegram Web App obyekti bilan ishlash
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Ekranni to'liq ochish
+
+        // Agar Telegram orqali kirilsa, User ma'lumotlarini olish
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            const initials = user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U';
+            document.getElementById('user-avatar').innerText = initials;
+            document.getElementById('profile-avatar').innerText = initials;
+            document.getElementById('user-tg-id').innerText = user.id;
+        }
+
+        // Tablarni almashtirish logikasi
+        function switchTab(tabId, element) {
+            // Hamma tablarni yashirish
+            document.querySelectorAll('.container').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Hamma menyu ranglarini o'chirish
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+            });
+
+            // Bosilgan tabni ko'rsatish
+            document.getElementById('tab-' + tabId).classList.add('active');
+            element.classList.add('active');
+            
+            // Web App da haptic feedback (vibratsiya) berish
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function copyId() {
+            const idText = document.getElementById('user-tg-id').innerText;
+            navigator.clipboard.writeText(idText);
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            
+            const btn = document.querySelector('.copy-btn');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Nusxalandi';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-regular fa-copy"></i> Nusxalash';
+            }, 2000);
+        }
+
+        function tgAlert(msg) {
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            if(tg.showAlert) {
+                tg.showAlert(msg);
+            } else {
+                alert(msg);
+            }
+        }
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stars & Premium Shop</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0a1b;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #8a2be2;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --stars-gradient: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            --text-main: #ffffff;
+            --text-muted: #a09fbd;
+            --glass-blur: blur(12px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: var(--bg-color);
+            background-image: radial-gradient(circle at top right, rgba(138, 43, 226, 0.15), transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(75, 0, 130, 0.15), transparent 40%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 80px; /* space for bottom nav */
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .glass-card:active { transform: scale(0.98); }
+
+        /* Container */
+        .container { padding: 20px; max-width: 500px; margin: 0 auto; display: none; animation: fadeIn 0.3s ease-in-out; }
+        .container.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .header h1 { font-size: 24px; font-weight: 600; }
+        .user-avatar { width: 45px; height: 45px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+
+        /* Balance Section */
+        .balance-section { margin-bottom: 25px; text-align: center; position: relative; overflow: hidden; }
+        .balance-title { font-size: 14px; color: var(--text-muted); margin-bottom: 5px; }
+        .balance-amount { font-size: 36px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .balance-amount i { color: #f6d365; font-size: 28px; }
+        .btn-topup { background: var(--primary-gradient); color: white; border: none; padding: 15px 30px; border-radius: 15px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4); display: flex; justify-content: center; align-items: center; gap: 10px; }
+
+        /* Grid Services */
+        .services-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .service-card { text-align: left; padding: 20px 15px; position: relative; overflow: hidden; cursor: pointer; }
+        .service-icon { width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 15px; }
+        .stars-icon { background: var(--stars-gradient); box-shadow: 0 4px 15px rgba(246, 211, 101, 0.3); }
+        .premium-icon { background: var(--primary-gradient); box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3); }
+        .service-title { font-size: 16px; font-weight: 600; margin-bottom: 5px; }
+        .service-desc { font-size: 12px; color: var(--text-muted); }
+        .arrow-right { position: absolute; right: 15px; bottom: 20px; color: var(--text-muted); opacity: 0.5; }
+
+        /* Referral Banner */
+        .referral-banner { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; margin-bottom: 20px; cursor: pointer; }
+        .ref-left { display: flex; align-items: center; gap: 15px; }
+        .ref-icon { font-size: 20px; color: #a09fbd; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 12px; }
+
+        /* Rating List */
+        .rating-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .rating-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 15px; }
+        .rating-user { display: flex; align-items: center; gap: 15px; }
+        .rank { font-weight: bold; width: 25px; text-align: center; }
+        .rank-1 { color: #FFD700; font-size: 18px; }
+        .rank-2 { color: #C0C0C0; font-size: 18px; }
+        .rank-3 { color: #CD7F32; font-size: 18px; }
+        .rating-amount { font-weight: 600; color: #4ade80; }
+
+        /* Profile & History */
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text-muted); }
+        .empty-state i { font-size: 50px; margin-bottom: 15px; opacity: 0.5; }
+        .profile-id-card { text-align: center; padding: 30px 20px; margin-top: 20px; }
+        .profile-id-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .profile-id { font-size: 28px; font-weight: bold; margin-bottom: 15px; letter-spacing: 2px; }
+        .copy-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 8px 20px; border-radius: 20px; cursor: pointer; }
+
+        /* Bottom Nav */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(13, 10, 27, 0.85); backdrop-filter: blur(15px); border-top: 1px solid var(--card-border); display: flex; justify-content: space-around; padding: 15px 10px; z-index: 1000; padding-bottom: max(15px, env(safe-area-inset-bottom)); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 5px; color: var(--text-muted); text-decoration: none; font-size: 12px; transition: 0.3s; cursor: pointer; width: 25%; }
+        .nav-item i { font-size: 20px; transition: 0.3s; }
+        .nav-item.active { color: #fff; }
+        .nav-item.active i { color: #b185fa; transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+
+    <div id="tab-home" class="container active">
+        <div class="header">
+            <h1>Asosiy</h1>
+            <div class="user-avatar" id="user-avatar">A</div>
+        </div>
+
+        <div class="glass-card balance-section">
+            <div class="balance-title">Sizning balansingiz</div>
+            <div class="balance-amount"><i class="fa-solid fa-coins"></i> 0 <span style="font-size: 18px; color: var(--text-muted); font-weight: normal;">so'm</span></div>
+            <button class="btn-topup" onclick="tgAlert('Hisobni to\'ldirish tizimi bot orqali ishlaydi!')">
+                <i class="fa-solid fa-plus"></i> Hisobni to'ldirish
+            </button>
+        </div>
+
+        <div class="services-grid">
+            <div class="glass-card service-card" onclick="tgAlert('Stars xarid qilish menyusi')">
+                <div class="service-icon stars-icon"><i class="fa-solid fa-star"></i></div>
+                <div class="service-title">Stars olish</div>
+                <div class="service-desc">Telegram Stars</div>
+                <i class="fa-solid fa-chevron-right arrow-right"></i>
+            </div>
+            
+            <div class="glass-card service-card" onclick="tgAlert('Premium xarid qilish menyusi')">
+                <div class="service-icon premium-icon"><i class="fa-solid fa-gem"></i></div>
+                <div class="service-title">Premium</div>
+                <div class="service-desc">Telegram Premium</div>
+                <i class="fa-solid fa-chevron-right arrow-right"></i>
+            </div>
+        </div>
+
+        <div class="glass-card referral-banner" onclick="tgAlert('Referal ssilka nusxalandi!')">
+            <div class="ref-left">
+                <div class="ref-icon"><i class="fa-solid fa-link"></i></div>
+                <div>
+                    <div style="font-weight: 600;">Referral tizim</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">2% doimiy ulush oling</div>
+                </div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color: var(--text-muted); opacity: 0.5;"></i>
+        </div>
+    </div>
+
+    <div id="tab-history" class="container">
+        <div class="header">
+            <h1>Tarix</h1>
+        </div>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Barcha xaridlar va to'lovlar</p>
+        
+        <div class="empty-state">
+            <i class="fa-regular fa-folder-open"></i>
+            <p>Hali buyurtmalar yo'q</p>
+        </div>
+    </div>
+
+    <div id="tab-rating" class="container">
+        <div class="header">
+            <h1>Savdo reytingi</h1>
+        </div>
+        <p style="color: var(--text-muted); font-size: 14px;">Kim ko'p xarid qildi?</p>
+        
+        <div class="rating-list">
+            <div class="rating-item">
+                <div class="rating-user"><span class="rank rank-1"><i class="fa-solid fa-medal"></i></span> @UZ_CS</div>
+                <div class="rating-amount">176 760</div>
+            </div>
+            <div class="rating-item">
+                <div class="rating-user"><span class="rank rank-2"><i class="fa-solid fa-medal"></i></span> @Theo_updates</div>
+                <div class="rating-amount">150 000</div>
+            </div>
+            <div class="rating-item">
+                <div class="rating-user"><span class="rank rank-3"><i class="fa-solid fa-medal"></i></span> @Abdiazizova</div>
+                <div class="rating-amount">108 000</div>
+            </div>
+            <div class="rating-item">
+                <div class="rating-user"><span class="rank">4</span> @wheywhy</div>
+                <div class="rating-amount">36 000</div>
+            </div>
+            <div class="rating-item">
+                <div class="rating-user"><span class="rank">5</span> @kamron201</div>
+                <div class="rating-amount">27 000</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-profile" class="container">
+        <div class="header">
+            <h1>Profil</h1>
+        </div>
+
+        <div class="glass-card profile-id-card">
+            <div class="user-avatar" style="width: 70px; height: 70px; font-size: 30px; margin: 0 auto 15px auto;" id="profile-avatar">A</div>
+            <div class="profile-id-title">TELEGRAM ID</div>
+            <div class="profile-id" id="user-tg-id">8474897647</div>
+            <button class="copy-btn" onclick="copyId()"><i class="fa-regular fa-copy"></i> Nusxalash</button>
+        </div>
+
+        <h3 style="margin: 25px 0 10px 0; font-size: 16px;"><i class="fa-solid fa-robot"></i> API Kirish</h3>
+        <div class="glass-card" style="text-align: center; padding: 20px; cursor: pointer;" onclick="tgAlert('Yangi kalit yaratilmoqda...')">
+            + Yangi kalit yaratish
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('home', this)">
+            <i class="fa-solid fa-house"></i>
+            <span>Asosiy</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('history', this)">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Tarix</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('rating', this)">
+            <i class="fa-solid fa-trophy"></i>
+            <span>Reyting</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('profile', this)">
+            <i class="fa-solid fa-user"></i>
+            <span>Men</span>
+        </div>
+    </div>
+
+    <script>
+        // Telegram Web App obyekti bilan ishlash
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Ekranni to'liq ochish
+
+        // Agar Telegram orqali kirilsa, User ma'lumotlarini olish
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            const initials = user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U';
+            document.getElementById('user-avatar').innerText = initials;
+            document.getElementById('profile-avatar').innerText = initials;
+            document.getElementById('user-tg-id').innerText = user.id;
+        }
+
+        // Tablarni almashtirish logikasi
+        function switchTab(tabId, element) {
+            // Hamma tablarni yashirish
+            document.querySelectorAll('.container').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            // Hamma menyu ranglarini o'chirish
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active');
+            });
+
+            // Bosilgan tabni ko'rsatish
+            document.getElementById('tab-' + tabId).classList.add('active');
+            element.classList.add('active');
+            
+            // Web App da haptic feedback (vibratsiya) berish
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function copyId() {
+            const idText = document.getElementById('user-tg-id').innerText;
+            navigator.clipboard.writeText(idText);
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            
+            const btn = document.querySelector('.copy-btn');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Nusxalandi';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-regular fa-copy"></i> Nusxalash';
+            }, 2000);
+        }
+
+        function tgAlert(msg) {
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            if(tg.showAlert) {
+                tg.showAlert(msg);
+            } else {
+                alert(msg);
+            }
+        }
+    </script>
+</body>
+</html>

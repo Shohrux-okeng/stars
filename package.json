@@ -1,0 +1,14 @@
+{
+  "name": "stars-shop-bot",
+  "version": "1.0.0",
+  "description": "Telegram Stars / Premium / Gift / PUBG UC savdo boti - qo'lda to'lov tasdiqlash bilan",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "lowdb": "^1.0.0",
+    "telegraf": "^4.16.3"
+  }
+}
