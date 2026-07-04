@@ -100,3 +100,4 @@ Hozircha "Karta orqali (avto)" tugmasi shunchaki "tez kunda" degan xabar beradi 
 - Telegram Stars/Premium/Gift'larni norasmiy usulda (Telegram'ning o'z to'lov tizimidan tashqari) sotish/sotib olish Telegram foydalanish shartlariga zid bo'lishi mumkin, shuningdek pul o'tkazmalari bilan bog'liq mahalliy qonunchilikka ham rioya qilish tavsiya etiladi — bu masalalarni o'zingiz aniqlashtirib olishingiz maqsadga muvofiq (men huquqshunos emasman, shuning uchun aniq maslahat berolmayman).
 # stars-bot
 # stars
+# stars
